@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Website AI agent field guide: what to allow, what to block, and where</title>
+<meta name="description" content="Website AI agent traffic on a B2B site now comes in four kinds, and each one deserves a different rule. This field guide is written to be handed to whoever runs your firewall, CDN or bot settings. It describes each kind of Claude traffic, how to recognise it, what to allow, and the mistake that most">
+<link rel="canonical" href="https://dkkimo1.github.io/Brinvik-public/posts/website-ai-agent-field-guide-what-to-allow-what-to-block-and-where.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Website AI agent field guide: what to allow, what to block, and where">
+<meta property="og:description" content="Website AI agent traffic on a B2B site now comes in four kinds, and each one deserves a different rule. This field guide is written to be handed to whoever runs your firewall, CDN or bot settings. It describes each kind of Claude traffic, how to recognise it, what to allow, and the mistake that most">
+<meta property="og:url" content="https://dkkimo1.github.io/Brinvik-public/posts/website-ai-agent-field-guide-what-to-allow-what-to-block-and-where.html">
+<meta property="article:published_time" content="2026-11-12T11:36:12.672Z">
+<style>
+body{margin:0;background:#fff;color:#1f2328;font:17px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:720px;margin:0 auto;padding:48px 20px 80px}
+h1{font-size:2em;line-height:1.25;margin:0 0 .4em}
+time{color:#656d76;font-size:.9em}
+article{margin-top:28px}
+img{max-width:100%;height:auto;border-radius:8px}
+.cover{margin:24px 0 0}.cover img{display:block;width:100%}
+a{color:#0969da}
+</style>
+</head>
+<body>
+<main>
+<h1>Website AI agent field guide: what to allow, what to block, and where</h1>
+<time datetime="2026-11-12T11:36:12.672Z">November 12, 2026</time>
+<article>
+Website AI agent traffic on a B2B site now comes in four kinds, and each one deserves a different rule. This field guide is written to be handed to whoever runs your firewall, CDN or bot settings. It describes each kind of Claude traffic, how to recognise it, what to allow, and the mistake that most often turns a buyer away. The examples come from an invented access log for a five-page site, sorted by a free checker Claude built; the site, the log and every address in it except Anthropic's own are invented.
+
+![A drawing on an ivory ground: four page cards of an invented site and a booking calendar, a dotted path along the bottom, a dashed outline of a figure slipping in by the pricing page, and a solid figure stopped by an oxblood bar in front of the calendar](<a href="https://brinvik.com/lab/agent-visitor-check/cover-en-1600x720.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/lab/agent-visitor-check/cover-en-1600x720.png</a>)
+
+## Kind one: the buyer's agent
+
+**What it is.** Claude browsing for a person who asked it to do something: compare vendors, read pricing, book a meeting. It is a buyer, on an errand.
+
+**How to recognise it.** Two things together. The User-Agent carries the token `Claude-Agent`, added to the browser's normal string. And the source address is on the list Anthropic publishes at `<a href="https://claude.com/.well-known/sail`" target="_blank" rel="noopener noreferrer">https://claude.com/.well-known/sail`</a>, under the service `Claude-Agent`. Anthropic's advice is to match the token rather than the full string, check the address against the file, and update rules from the file automatically, because the addresses change. The file format follows a draft (`draft-kelley-webbotauth-sail-00`).
+
+**What to allow.** The pages a buyer needs: pricing, cases, contact and the booking page. Write it as an allow rule that is read before any rule that matches on words.
+
+**The mistake.** A word rule in front of the booking page. In the invented log, a rule written for scrapers refused any User-Agent containing "agent" on `/book`. The buyer's agent made 8 requests from 2 listed addresses and 3 were refused, all on the booking page, all by that rule.
+
+## Kind two: the impostor
+
+**What it is.** Anything that types `Claude-Agent` into its User-Agent from an address that is not on the list. Anyone can do it in a second.
+
+**How to recognise it.** The token without a listed address.
+
+**What to allow.** Whatever your normal policy for unknown automated traffic says. The token earns it nothing.
+
+**The mistake.** Trusting the token. The opposite mistake is just as common: a rule that judges by the word refuses the real agent and the impostor alike, so it looks like protection where it happens to sit and lets the impostor in everywhere else. In the invented log the impostor made 6 requests and was answered 5 times, mostly on pricing.
+
+## Kind three: Anthropic's crawlers and fetchers
+
+**What it is.** ClaudeBot, Claude-User and Claude-SearchBot. They read the web for Anthropic's own purposes and are managed separately from the agent.
+
+**How to recognise it.** Their tokens in the User-Agent. The SAIL file does not cover them, so the free checker does not verify their addresses and says so.
+
+**What to allow.** Whatever your crawler policy is. Rate-limit or block ClaudeBot if you want to; robots.txt is the place for it. That decision has nothing to do with whether a buyer's agent can book.
+
+**The mistake.** Letting the crawler policy decide the agent's fate, in either direction. In the invented log the crawlers made 7 requests (4 ClaudeBot, 2 Claude-SearchBot, 1 Claude-User), and none of them was a buyer.
+
+## Kind four: anything you cannot verify
+
+**What it is.** A `Claude-Agent` request whose address cannot be checked. Either the address list could not be fetched, or the address field in your log holds something other than one address, typically a comma-separated `X-Forwarded-For` list.
+
+**How to recognise it.** The checker puts it in an "unverified" pile and says why. If the list could not be fetched, it calls nothing real and exits with code 2.
+
+**What to allow.** Treat it as unknown until you can verify it. Then fix the cause: fetch the list on a schedule, and log the client's real address.
+
+**The mistake.** Logging the proxy. Behind a CDN or load balancer, many servers log the proxy's address, and then every real agent looks like an impostor. Taking the address from an `X-Forwarded-For` header the client sets makes the opposite mistake: an impostor can look real.
+
+![Screenshot of the demo: the 21 Claude-related requests from the invented log sorted into four piles, real, fake, crawler and blocked, with the booking page ringed where the real agent was refused](<a href="https://brinvik.com/lab/agent-visitor-check/demo-en.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/lab/agent-visitor-check/demo-en.png</a>)
+
+## Website AI agent rules, in the order they should be read
+
+The order matters more than the rules themselves. A sensible order for a B2B site:
+
+1. **Allow the listed agent.** If the User-Agent carries the token `Claude-Agent` and the source address is in the current SAIL list, allow it on pricing, cases, contact and booking. Stop reading rules.
+2. **Apply the crawler policy.** ClaudeBot, Claude-User and Claude-SearchBot, by token and robots.txt, as you decide.
+3. **Apply the scraper rules.** Word matches, rate limits, headless-browser rules, whatever you already have.
+4. **Log the decision.** With the client's real address, the status, and which rule answered.
+
+The invented log's checker can replay the logged requests against an order like this. With rule one added in front of the scraper rule, no real request is refused and the impostor is still refused 1 time at the booking page. That is a replay of the rules, not a recorded outcome.
+
+## How to keep the address list current
+
+Fetch the SAIL file on a schedule rather than pasting the addresses into a rule. The file states its own validity in `expires_after`; the copy fetched on 8 November 2026 listed 9 IPv4 entries and had a `modified` date of 22 October. If your CDN or WAF cannot fetch a list itself, a small job that fetches the file and rewrites an allow list is enough. If the fetch fails, keep the last good copy and raise an alert; never fall back to trusting the token.
+
+## How to check that it worked
+
+Take a day of your access log after the change and run the free checker on it. It reads the combined format, your robots.txt and a short text file describing your rules, and prints how many requests came from real agents, how many were refused, on which page and by which rule, and how many impostor requests were answered. If the first number is not zero after the change, the rule order is still wrong somewhere.
+
+The checker, the invented sample log, the 28 tests and a one-page version of this guide are free from [the agent visitor checker page](<a href="https://brinvik.com/en/resources/agent-visitor-checker?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-agent-visitor-check&amp;utm_content=githubpages-checker)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/resources/agent-visitor-checker?utm_source=github_pages&utm_medium=article&utm_campaign=lab-agent-visitor-check&utm_content=githubpages-checker)</a>.
+
+![The work split on this build between Claude and Kim, phase by phase, from the build's own work ledger](<a href="https://brinvik.com/lab/agent-visitor-check/workdivision-split-en-1080x1350.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/lab/agent-visitor-check/workdivision-split-en-1080x1350.png</a>)
+
+## Questions to send your hosting provider or agency
+
+If someone else runs your site, these five questions get you most of the way without a meeting:
+
+1. Which of our firewall, WAF or CDN rules match on words in the User-Agent, such as agent, bot or crawler, and which paths do they cover?
+2. Is there an allow rule for requests carrying the `Claude-Agent` token from addresses on Anthropic's published list, and is it read before those word rules?
+3. Does that allow rule fetch the list from the SAIL file on a schedule, or are the addresses pasted in?
+4. Does our access log record the visitor's real address, or the address of a proxy or CDN in front of the site?
+5. Can you send us one day of the access log, so we can run the checker on it?
+
+The answers to the first four tell you whether the rules are in the right order. The fifth lets you check that they work. If the answer to the fourth is that the log holds the proxy's address, fix that first, because no rule and no checker can tell a real agent from an impostor when every request seems to come from the same place.
+
+## A note on robots.txt
+
+robots.txt is a request to crawlers, not a gate, and it is the right place to state your policy for ClaudeBot and the other crawlers. It is the wrong place to look for the buyer's agent, which is a browser acting for a person and does not consult it the way a crawler does. The checker reads robots.txt only to report what it says about each crawler token, and never uses it to decide whether an agent request was refused. The status code in your log is the truth.
+
+## What the guide leaves out
+
+It does not tell you whether to let agents book at all. Some companies will want a human-only calendar, and that is a fair choice, made on purpose and enforced by the address list rather than by a word. It does not cover other vendors' agents, which will publish their own identifiers. And it does not know what a refused request cost, because a log cannot know whether the buyer would have booked.
+
+The full write-up, with a drawn demo of the invented log and a button that replays it with the fix, is [the write-up on the buyer's agent and the booking page](<a href="https://brinvik.com/en/resources/website-ai-agent-access-check?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-agent-visitor-check&amp;utm_content=githubpages-en)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/resources/website-ai-agent-access-check?utm_source=github_pages&utm_medium=article&utm_campaign=lab-agent-visitor-check&utm_content=githubpages-en)</a>. In Danish: [den danske udgave](<a href="https://brinvik.com/da/ressourcer/ai-agent-til-hjemmeside-adgangstjek?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-agent-visitor-check&amp;utm_content=githubpages-da)" target="_blank" rel="noopener noreferrer">https://brinvik.com/da/ressourcer/ai-agent-til-hjemmeside-adgangstjek?utm_source=github_pages&utm_medium=article&utm_campaign=lab-agent-visitor-check&utm_content=githubpages-da)</a>. If you want a website AI agent of your own that buyers and their agents can both reach, that is [the website AI agent work I do for B2B companies](<a href="https://brinvik.com/en/services/website-ai-agent?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-agent-visitor-check&amp;utm_content=githubpages-service)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/services/website-ai-agent?utm_source=github_pages&utm_medium=article&utm_campaign=lab-agent-visitor-check&utm_content=githubpages-service)</a>.<hr><ul><li><a href="https://njump.me/nevent1qgswedmqdh5xep96ntzr8wr6plcmx2jl920v2mx3rmy6g5tz5mtxmwqpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqgjwaehxw309ahkvenrdpskjm3wwp6kyqgcwaehxw309aex2mrp0yh8xmn0wf6zuum0vd5kzmqqyrered34rw6a5aumgy4hljzyal3jaeeps4224gwwt2uh4wvcvcxm7ae0tqu" target="_blank" rel="noopener noreferrer">https://njump.me/nevent1qgswedmqdh5xep96ntzr8wr6plcmx2jl920v2mx3rmy6g5tz5mtxmwqpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqgjwaehxw309ahkvenrdpskjm3wwp6kyqgcwaehxw309aex2mrp0yh8xmn0wf6zuum0vd5kzmqqyrered34rw6a5aumgy4hljzyal3jaeeps4224gwwt2uh4wvcvcxm7ae0tqu</a></li></ul>
+</article>
+</main>
+</body>
+</html>
