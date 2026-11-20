@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude for business: a field guide to the shop profile a quoting skill needs</title>
+<meta name="description" content="Claude for business in a manufacturing setting runs on a document most shops have never written down: a plain description of what the plant can and cannot do. Anthropic's quoting chain in Claude for Manufacturing, launched on 12 November 2026, reads that description before it touches a request for q">
+<link rel="canonical" href="https://dkkimo1.github.io/Brinvik-public/posts/claude-for-business-a-field-guide-to-the-shop-profile-a-quoting-skill.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Claude for business: a field guide to the shop profile a quoting skill needs">
+<meta property="og:description" content="Claude for business in a manufacturing setting runs on a document most shops have never written down: a plain description of what the plant can and cannot do. Anthropic's quoting chain in Claude for Manufacturing, launched on 12 November 2026, reads that description before it touches a request for q">
+<meta property="og:url" content="https://dkkimo1.github.io/Brinvik-public/posts/claude-for-business-a-field-guide-to-the-shop-profile-a-quoting-skill.html">
+<meta property="article:published_time" content="2026-11-20T09:36:56.169Z">
+<style>
+body{margin:0;background:#fff;color:#1f2328;font:17px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:720px;margin:0 auto;padding:48px 20px 80px}
+h1{font-size:2em;line-height:1.25;margin:0 0 .4em}
+time{color:#656d76;font-size:.9em}
+article{margin-top:28px}
+img{max-width:100%;height:auto;border-radius:8px}
+.cover{margin:24px 0 0}.cover img{display:block;width:100%}
+a{color:#0969da}
+</style>
+</head>
+<body>
+<main>
+<h1>Claude for business: a field guide to the shop profile a quoting skill needs</h1>
+<time datetime="2026-11-20T09:36:56.169Z">November 20, 2026</time>
+<article>
+Claude for business in a manufacturing setting runs on a document most shops have never written down: a plain description of what the plant can and cannot do. Anthropic's quoting chain in Claude for Manufacturing, launched on 12 November 2026, reads that description before it touches a request for quotation. This guide goes through it section by section, using the profile I had Claude Code write for an invented Danish machine shop in Herning, and shows what each section made possible when the chain was tested against twelve invented requests.
+
+![Dark cover dated 17 November 2026, kicker Claude News: Anthropic gave Claude a quoting skill. It guessed no prices](<a href="https://brinvik.com/claude-news/2026-11-17-claude-tilbud-maskinvaerksted/brinvik-rfq-cover-en-1920x1080.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/claude-news/2026-11-17-claude-tilbud-maskinvaerksted/brinvik-rfq-cover-en-1920x1080.png</a>)
+
+*The test behind this guide: twelve invented requests for quotation sent to an invented machine shop.*
+
+The short version of the test: the same model, Claude Sonnet 5.5, answered each request twice with only the profile and closed orders, and twice with the profile plus seven of Anthropic's skill files pinned to commit e0ab6e5. Without the files it gave the customer a price on 6 of the 8 requests that had an open question in run 1, and 7 of 8 in run 2. With them it raised all 11 planted gaps in both runs and gave 0 prices. Most of what it raised, it raised because the profile told it where the edges were.
+
+## What is a shop profile, and why does a quoting skill need one?
+
+A shop profile is a short text file that states your processes, limits, materials, tolerances, certifications, terms and past orders. The quoting skill compares each incoming request against it, so every no-bid, every tolerance warning and every comparable price comes from what you wrote there.
+
+The chain in question is called rfq-to-quote. It runs a request through intake (customer-inquiry-intake) and then costing (quote-build), with four approval gates where the estimator sends the questions, confirms bid or no-bid, confirms the design and releases the quote. The files sit in [Anthropic's claude-for-manufacturing plugin folder on GitHub](<a href="https://github.com/anthropics/claude-plugins-official/tree/main/plugins/claude-for-manufacturing)" target="_blank" rel="noopener noreferrer">https://github.com/anthropics/claude-plugins-official/tree/main/plugins/claude-for-manufacturing)</a>, and the README calls them a reference implementation.
+
+## The template
+
+Here is the structure, filled in with the invented shop wherever the test had a fact, and left as a bracket where it did not. Replace the brackets and delete what does not apply.
+
+```text
+SHOP PROFILE
+
+Company
+ &nbsp;Name: [your company]
+ &nbsp;Location: Herning, Denmark
+ &nbsp;People: 41
+
+Processes
+ &nbsp;CNC milling, 3-axis and 5-axis
+ &nbsp;CNC turning
+ &nbsp;Largest part: [envelope you can actually machine and handle, in mm]
+
+What we do NOT do
+ &nbsp;No welding
+ &nbsp;No sheet metal
+ &nbsp;No casting
+ &nbsp;[anything else you send out or turn away]
+
+Materials
+ &nbsp;Regular: [the alloys and steels you run every month]
+ &nbsp;No experience with: [materials you have never cut, or never certified]
+
+Demonstrated tolerances (shown on delivered parts, not hoped for)
+ &nbsp;Dimensions: +/- 0.01 mm
+ &nbsp;Position: 0.02 mm
+ &nbsp;Below 0.01 mm: not demonstrated
+
+Certifications
+ &nbsp;Held: ISO 9001:2015
+ &nbsp;Not held: AS9100, ISO 13485, IATF 16949
+
+Standard terms
+ &nbsp;Payment: net 30
+ &nbsp;Delivery: EXW Herning
+ &nbsp;Liability: capped at invoice value, no consequential losses
+ &nbsp;Quote validity: [your standard validity]
+
+Closed orders (actual cost and sale price per piece)
+ &nbsp;AO-25012 | bracket 120x80x15 | 6082, anodised black | 250 pcs |
+ &nbsp; &nbsp;closed 2025-09-19 | actual cost 96 kr | sold 129 kr
+ &nbsp;[the other closed orders, same format]
+```
+
+Plain text is enough, and a file your estimator can edit in a text editor gets kept current.
+
+## Processes and largest part: what do you actually make?
+
+List the processes you run in house and the largest part you can machine. This is the first filter for any request, because a part that needs a process you lack, or that is too big for your machines, should never reach the pricing step.
+
+For the invented shop that meant CNC milling on 3- and 5-axis machines and turning. Request R07 asked for a welded frame of 2.4 m. With the skill, Claude recommended no-bid on it in both runs, with the reason, before writing a single question to the customer. That is the hard disqualifier rule: the wrong process, a part outside the size envelope or a missing certification stops the sequence with a recommendation, and the estimator decides.
+
+## What does the shop NOT do, and why write it down?
+
+Write down every process you turn away. A model reading a profile that lists only what you do has to guess about everything else, and a guess tends to come out as yes.
+
+This section is the one I would push hardest on. "No welding, no sheet metal, no casting" is a single line, and it is the line that made the R07 no-bid possible. A profile copied from your website's capability page will make Claude more optimistic about your plant than you are.
+
+## Materials: what do you run, and what have you never cut?
+
+Name the materials you machine regularly and, separately, the ones you have no experience with. The second list matters more for quoting, because it turns a material question from a price adjustment into a real question.
+
+In the test, request R05 named the material two ways: 316L in the email and 1.4301, which is 304, in the parts list. Request R10 buried the real specification four emails down a forwarded thread, where the customer had moved to 7075 with clear anodising at rev. C, while the top of the thread still read 6082, black, rev. B. With the skill, both mismatches were raised in both runs as questions to the customer.
+
+## Demonstrated tolerances: what have you shown, not what do you hope for?
+
+Write the tolerances you have proven on delivered parts, for dimensions and for position separately. Leave out what the machines are rated for and what you think you could hold on a good day.
+
+The invented shop had demonstrated plus or minus 0.01 mm on dimensions and 0.02 mm on position, and the profile said plainly that nothing below 0.01 mm had been shown. Request R08 was a mounting plate with a position tolerance of 0.005 mm.
+
+That line in the profile produced the clearest catch in the test. With the skill, Claude recommended no-bid on R08 in both runs and called it a breach of demonstrated capability that the estimator can overrule, which is a softer stop than the welding frame and correctly so. Without the skill, Claude noticed the same problem in run 1, wrote that the tolerance was below what the shop had shown, and quoted 190 kr per piece anyway. Both arms had the fact; only the skill acted on it.
+
+![Twelve columns, one per request from R01 to R12, showing what each reply did, with red cells where a price met an open question](<a href="https://brinvik.com/claude-news/2026-11-17-claude-tilbud-maskinvaerksted/brinvik-rfq-info-1-spor-en-1600.jpg" target="_blank" rel="noopener noreferrer">https://brinvik.com/claude-news/2026-11-17-claude-tilbud-maskinvaerksted/brinvik-rfq-info-1-spor-en-1600.jpg</a>)
+
+*Where each request landed. The red cells are prices written while a question was still open.*
+
+## Certifications: which do you hold, and which do you not?
+
+List the certifications you hold, and then list the common ones in your market that you do not hold. Naming the absent ones lets the skill reject a requirement outright instead of hoping the customer will not check.
+
+The invented shop held ISO 9001:2015 only, and the profile named AS9100, ISO 13485 and IATF 16949 as not held. Request R06 was an aerospace bracket that required AS9100. With the skill, no-bid in both runs, with the reason. Without the skill, run 2 gave a clear no-bid, but in run 1 Claude declined to write a priced quote without recommending no-bid. Across both hard jobs, 3 of 4 replies without the skill were a clear no, against all of them with it.
+
+## Standard terms: payment, delivery, liability and validity
+
+State your standard payment terms, delivery terms, liability position and how long a quote is valid. A request that arrives with its own terms can then be checked against yours, line by line.
+
+The invented shop's terms were net 30, EXW Herning, liability capped at invoice value and no consequential losses. Request R12 was technically complete but carried the customer's own terms: net 90, liability for consequential losses, and DAP. The skill raised the clash in both runs. Without the terms in the profile there is nothing to clash with.
+
+## Closed orders: why include actual cost and sale price?
+
+Add a handful of finished jobs, each with the part, material, finish, quantity, close date, actual cost per piece and sale price per piece. The skill uses them as comparables for the bid recommendation.
+
+There is a sharp edge here. Without the skill, Claude used the closed orders as a price list. On request R02, a bracket whose drawing had no revision, run 1 produced a finished quote, "300 stk. | 129,00 kr. | 38.700,00 kr.", at exactly the sale price of AO-25012, with no mention of the revision.
+
+![Two replies to request R02 side by side: a priced quote table copied from an old order on the left, and an email asking the customer for the drawing and its revision on the right](<a href="https://brinvik.com/claude-news/2026-11-17-claude-tilbud-maskinvaerksted/brinvik-rfq-info-2-tilbud-en-1600.jpg" target="_blank" rel="noopener noreferrer">https://brinvik.com/claude-news/2026-11-17-claude-tilbud-maskinvaerksted/brinvik-rfq-info-2-tilbud-en-1600.jpg</a>)
+
+*Request R02 answered twice by the same model. The left reply copied an old price; the right one asked for the drawing.*
+
+With the skill, the closed orders stayed internal. Money amounts did appear in those replies, but they were the old orders' actual cost and sale price, written for the estimator, never a price to the customer; every reply where the grader and a search for money amounts disagreed was read to confirm it. The R02 reply with the skill asked the customer for the missing drawing and which revision it was, and said a price would follow once the answers were in.
+
+So include actual cost, not only the sale price. The bid recommendation rests on cost, and if the profile carries only past prices, a model without the skill will copy them straight into a quote.
+
+## How do you know your profile is good enough?
+
+Run a handful of your own past requests through it, including some you know had problems, and check whether each problem shows up as a question or a no-bid. If a known gap goes unmentioned, the profile is missing the fact that would have caught it.
+
+My test had real limits. It used 12 requests, one invented shop, no ERP, no CAD and no connectors, so the costing and drawing steps were never exercised, and Claude Code, working on my instructions, wrote both the requests and the answer key. The skill also held back on the one complete request, a shaft at rev. C in 42CrMo4, which costs a day on a quote that could have gone out, and its Danish replies mixed in English terms such as Gate 1 and bid/no-bid because the skill files are in English.
+
+The cost side was small: a reply with the skill cost 6.8 US cents on average against 2.5 without, at list price, and the whole test of 96 calls cost 2.25 US dollars.
+
+## Where the profile fits in a Claude for business rollout
+
+The profile is the cheapest part of a Claude implementation for quoting and the part that decides most of the outcome. It takes an estimator's knowledge and puts it where AI agents can read it, and it stays useful even if you change models or tools later.
+
+If you want every reply and the interactive demo, the [complete write-up of the quoting test with the demo and the film](<a href="https://brinvik.com/en/journal/claude-for-business-manufacturing-quote-test?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=2026-11-17-claude-tilbud-maskinvaerksted&amp;utm_content=github_pages-en" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/journal/claude-for-business-manufacturing-quote-test?utm_source=github_pages&utm_medium=article&utm_campaign=2026-11-17-claude-tilbud-maskinvaerksted&utm_content=github_pages-en</a>) has them, and the [Danish edition of the quoting article](<a href="https://brinvik.com/da/journal/ai-automatisering-tilbud-claude-for-manufacturing?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=2026-11-17-claude-tilbud-maskinvaerksted&amp;utm_content=github_pages-da" target="_blank" rel="noopener noreferrer">https://brinvik.com/da/journal/ai-automatisering-tilbud-claude-for-manufacturing?utm_source=github_pages&utm_medium=article&utm_campaign=2026-11-17-claude-tilbud-maskinvaerksted&utm_content=github_pages-da</a>) covers the same test in Danish. For help writing a profile for your own plant and wiring it into AI workflow automation for your sales desk, see [my Claude advisory work as an AI consultant](<a href="https://brinvik.com/en/services/ai-advisory?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=2026-11-17-claude-tilbud-maskinvaerksted&amp;utm_content=github_pages-service)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/services/ai-advisory?utm_source=github_pages&utm_medium=article&utm_campaign=2026-11-17-claude-tilbud-maskinvaerksted&utm_content=github_pages-service)</a>.<hr><ul><li><a href="https://local.google.com/place?id=1540968194272171033&amp;use=posts&amp;lpsid=CAIQACoeChxtc3BfaDpjNHFsbjVFLVJFWmtTX2tlMHp0V3ZB" target="_blank" rel="noopener noreferrer">https://local.google.com/place?id=1540968194272171033&amp;use=posts&amp;lpsid=CAIQACoeChxtc3BfaDpjNHFsbjVFLVJFWmtTX2tlMHp0V3ZB</a></li><li><a href="https://njump.me/nevent1qgswedmqdh5xep96ntzr8wr6plcmx2jl920v2mx3rmy6g5tz5mtxmwqpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqg0waehxw309ahx7um5wghx6mmdqyxhwumn8ghj7mn0wvhxcmmvqqsrw68xw4kzstzaaulan0kawc69697hvcgjmhj4k73e5zudgr45t9s7qjn0x" target="_blank" rel="noopener noreferrer">https://njump.me/nevent1qgswedmqdh5xep96ntzr8wr6plcmx2jl920v2mx3rmy6g5tz5mtxmwqpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqg0waehxw309ahx7um5wghx6mmdqyxhwumn8ghj7mn0wvhxcmmvqqsrw68xw4kzstzaaulan0kawc69697hvcgjmhj4k73e5zudgr45t9s7qjn0x</a></li><li><a href="https://docs.google.com/document/d/1G0oL0o97fhXGo6MW4vwRP_jq71qnQFBd7naeHrL-oLU/view" target="_blank" rel="noopener noreferrer">https://docs.google.com/document/d/1G0oL0o97fhXGo6MW4vwRP_jq71qnQFBd7naeHrL-oLU/view</a></li><li><a href="https://docs.google.com/presentation/d/1TV2x_5cQRZlNy33drya3x-biuwrLst5DXKwLAwsLJY8/view" target="_blank" rel="noopener noreferrer">https://docs.google.com/presentation/d/1TV2x_5cQRZlNy33drya3x-biuwrLst5DXKwLAwsLJY8/view</a></li></ul>
+</article>
+</main>
+</body>
+</html>
