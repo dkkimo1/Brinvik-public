@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internal AI tools: a field guide for the owner of a skill library</title>
+<meta name="description" content="Internal AI tools on Claude increasingly arrive as a shared skill library, and every library ends up with an owner, whether anyone appointed one or not. This guide is for that person: usually whoever runs revenue operations, the one who already owns the CRM fields and the pipeline stages. It draws o">
+<link rel="canonical" href="https://dkkimo1.github.io/Brinvik-public/posts/internal-ai-tools-a-field-guide-for-the-owner-of-a-skill-library.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Internal AI tools: a field guide for the owner of a skill library">
+<meta property="og:description" content="Internal AI tools on Claude increasingly arrive as a shared skill library, and every library ends up with an owner, whether anyone appointed one or not. This guide is for that person: usually whoever runs revenue operations, the one who already owns the CRM fields and the pipeline stages. It draws o">
+<meta property="og:url" content="https://dkkimo1.github.io/Brinvik-public/posts/internal-ai-tools-a-field-guide-for-the-owner-of-a-skill-library.html">
+<meta property="article:published_time" content="2026-11-20T11:31:12.392Z">
+<style>
+body{margin:0;background:#fff;color:#1f2328;font:17px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:720px;margin:0 auto;padding:48px 20px 80px}
+h1{font-size:2em;line-height:1.25;margin:0 0 .4em}
+time{color:#656d76;font-size:.9em}
+article{margin-top:28px}
+img{max-width:100%;height:auto;border-radius:8px}
+.cover{margin:24px 0 0}.cover img{display:block;width:100%}
+a{color:#0969da}
+</style>
+</head>
+<body>
+<main>
+<h1>Internal AI tools: a field guide for the owner of a skill library</h1>
+<time datetime="2026-11-20T11:31:12.392Z">November 20, 2026</time>
+<article>
+Internal AI tools on Claude increasingly arrive as a shared skill library, and every library ends up with an owner, whether anyone appointed one or not. This guide is for that person: usually whoever runs revenue operations, the one who already owns the CRM fields and the pipeline stages. It draws on a test I had Claude build on an invented sales team, every pick recorded on Claude Sonnet 5.5, three runs per request.
+
+![A drawing on an ivory ground: a sales team's skill library as two shelves of open bins with gold dots in them, a speech bubble dropping requests in, a pen rewriting the label of one bin ringed in oxblood, and a red dot pulled across into it from the bin next door](<a href="https://brinvik.com/lab/skill-trigger-test/cover-en-1600x720.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/lab/skill-trigger-test/cover-en-1600x720.png</a>)
+
+## Why a skill library needs an owner
+
+A skill is shared configuration. Like a CRM field or a pipeline stage, it is written once, used by everyone, and drifts when nobody looks. The difference is that a wrong CRM field shows up in a report. A skill that loads at the wrong moment shows up nowhere. The seller gets an answer that follows the wrong recipe, or no recipe, and has no way to know.
+
+The test behind this guide found the good news first: seven skills with one-sentence descriptions got 40 messy, half-Danish seller requests right in 120 of 120 runs. Then it found the risk: with twenty overlapping skills, one description rewrite fixed a miss and moved two requests that had been right into the wrong skill, every run.
+
+## How internal AI tools pick a skill
+
+Claude reads the name and description of every skill in the library and picks one, or none. The rest of the skill loads after the pick. Everything in this guide follows from that one fact: the description is the only lever you have, and it is a lever on every request, not only the one you are thinking about when you write it.
+
+## Writing descriptions that get picked
+
+Say when, not only what. "Writes a recap email after a sales call" tells Claude what the skill does. "Use when a seller asks for a summary or recap to send the customer after a call or meeting" tells Claude when to pick it. The second kind gets picked more reliably.
+
+Add two or three example requests in the words your sellers type. Not the polished version. The real one: "opsummering til kunden efter opkaldet, kort". If your team types in two languages, put examples in both.
+
+Say what the skill is not for, when a neighbour exists. The test's rewritten pricing description did this well: not for a quick standalone calculation with no quote and no price list.
+
+Keep descriptions under the 1,024-character limit, and read them aloud as if you were Claude with only the list in front of you.
+
+## Placing new skills next to old ones
+
+The risk in the test came from closeness, not count. Twenty skills were nearly as good as seven, and every miss involved a pair of neighbours. Before adding a skill, list the existing skills it could be confused with. Then edit both descriptions so each says when it wins. In the test the pairs were obvious in hindsight: follow-up email beside call recap, pricing quote beside proposal draft, battlecard beside objection reply.
+
+![Screenshot of the demo: a board with one bin for each of the 20 skills and a hatched bin for no skill, each of the 40 requests sitting in the skill Claude picked, after the pricing skill was rewritten; a Danish request for a tilbud is ringed in the pricing bin and the discount sum in the no-skill bin](<a href="https://brinvik.com/lab/skill-trigger-test/demo-grown-en.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/lab/skill-trigger-test/demo-grown-en.png</a>)
+
+## Keeping a regression list
+
+This is the habit that matters most. Keep a list of 30 to 50 real requests, collected from sellers and cleaned of customer names. Give each a label: the skill that should load, or none. Where two skills are equally fine, accept both. Store the list beside the skills, in the same folder or repository, so it travels with them.
+
+Run the whole list, three times per request, before a rollout and after every change to any description, and not only the request that prompted the change. In the test, Claude rewrote one description to fix one miss. The fix worked for that request. Two others that had been right moved into the rewritten skill, and on 16 requests held back from the rewrite, the score dropped from 45 to 42 of 48. Only a full run shows that.
+
+![Screenshot of the demo: a board with one bin for each of the 20 skills and a hatched bin for no skill, each of the 40 requests sitting in the skill Claude picked, after the pricing skill was rewritten; a Danish request for a tilbud is ringed in the pricing bin and the discount sum in the no-skill bin](<a href="https://brinvik.com/lab/skill-trigger-test/demo-en.png" target="_blank" rel="noopener noreferrer">https://brinvik.com/lab/skill-trigger-test/demo-en.png</a>)
+
+## Words with two jobs
+
+Every language has words that mean two things in a sales team. In Danish, tilbud is both a proposal and a price quote, and it is exactly the word the test tripped on: the rewritten pricing description called a quote "an offer (tilbud)", and two sellers asking for a tilbud by Friday got the pricing skill instead of the proposal skill. Make a short list of your team's double-meaning words, in every language they type, and check every description that uses one.
+
+## Reading a miss
+
+Not every miss is the description's fault. In the test, the one miss in the twenty-skill run was a discount sum that loaded the pricing skill where the label said no skill. The label was set before the pricing skill existed, so the label is arguable. Before you edit a description, ask whether a sales lead would actually be unhappy with the pick. If not, fix the label.
+
+Three runs per request also means "3 of 3" is consistent in three tries, not a promise. A request that splits, two runs one way and one the other, is a sign the descriptions leave the choice open.
+
+## When to let Claude rewrite a description
+
+Claude is good at rewriting a description to fix a specific miss. In the test the rewrite was clear and specific. The problem was the brief, not the writing: fix this miss, with nothing else to check against. If you let Claude rewrite, give it the whole request list and ask it to keep every request right, then run the list yourself anyway.
+
+## A checklist before every change
+
+1. Which skills sit next to the one you are changing?
+2. Does the new description say when, with examples in both languages?
+3. Does it use a word with two jobs?
+4. Did the whole list run, three times per request, after the change?
+5. Did any request that was right before move?
+
+## A first week with a new library
+
+Day one, collect requests. Ask five sellers to paste the last ten things they asked Claude, and clean out names. You will have more than you need, and they will look nothing like the tidy examples you would have written yourself.
+
+Day two, label them. Do it with one seller in the room, because the arguments about which skill a request belongs to are where you find the skills that overlap.
+
+Day three, write or rewrite the descriptions with those arguments in front of you, and run the list. Read every miss. Fix labels where the label was wrong, descriptions where the description was.
+
+Day four, run the list again, three times per request, and only then roll the library out. Keep the list beside the skills from now on.
+
+## What to tell the sellers
+
+Tell them which skills exist and what each is for, in one line each, and ask them to report a wrong skill with the exact request they typed. Those reports are the best additions to your request list you will ever get, because they are the requests that broke something. Thank people for them, add them, and run the list.
+
+## Retiring a skill
+
+Libraries shrink too, and removing a skill is also a change that needs the whole list. When a skill goes, every request labelled with it needs a new label, and its neighbours will start picking up requests they never saw before. Relabel first, run the list, read where the orphaned requests landed, and adjust the neighbours' descriptions if they landed somewhere a sales lead would not accept.
+
+## Naming skills
+
+Names matter less than descriptions, but they still show up in the list Claude reads. Use plain names that say the job, like call-recap or pricing-quote, and avoid two names that differ by one word. If a seller could not tell two skills apart from their names alone, the descriptions have extra work to do.
+
+## Two skills or one?
+
+When two skills keep trading requests, ask whether the team actually needs both. A follow-up email and a call recap might be one skill with two sections. Merging them removes a boundary Claude has to guess at. Splitting makes sense only when the procedures really differ, and then both descriptions must say when each one wins, with examples. The test showed that a library of clearly different skills is the easy case. Keep yours in that shape where you can.
+
+## What this guide leaves out
+
+The test behind it used invented requests and labels, one model and one rewrite sample, and a reconstruction of how a skill is picked rather than any product's own loader. Treat its numbers as an illustration, and get your own by running your own list.
+
+The full write-up, with a demo of every pick, is [the write-up on the Claude skill test](<a href="https://brinvik.com/en/resources/internal-ai-tools-claude-skill-test?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-skill-trigger-test&amp;utm_content=githubpages-en)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/resources/internal-ai-tools-claude-skill-test?utm_source=github_pages&utm_medium=article&utm_campaign=lab-skill-trigger-test&utm_content=githubpages-en)</a>; in Danish, [den danske udgave](<a href="https://brinvik.com/da/ressourcer/interne-ai-vaerktoejer-test-af-claude-skills?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-skill-trigger-test&amp;utm_content=githubpages-da)" target="_blank" rel="noopener noreferrer">https://brinvik.com/da/ressourcer/interne-ai-vaerktoejer-test-af-claude-skills?utm_source=github_pages&utm_medium=article&utm_campaign=lab-skill-trigger-test&utm_content=githubpages-da)</a>. The test runner, the twenty skills and the labelled requests are free from [the skill test runner page](<a href="https://brinvik.com/en/resources/skill-trigger-test?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-skill-trigger-test&amp;utm_content=githubpages-runner)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/resources/skill-trigger-test?utm_source=github_pages&utm_medium=article&utm_campaign=lab-skill-trigger-test&utm_content=githubpages-runner)</a>. If you want a skill library for your sales team written and tested by someone who does this for a living, that is [the internal AI tools work I do for B2B sales teams](<a href="https://brinvik.com/en/services/internal-ai-tools?utm_source=github_pages&amp;utm_medium=article&amp;utm_campaign=lab-skill-trigger-test&amp;utm_content=githubpages-service)" target="_blank" rel="noopener noreferrer">https://brinvik.com/en/services/internal-ai-tools?utm_source=github_pages&utm_medium=article&utm_campaign=lab-skill-trigger-test&utm_content=githubpages-service)</a>.<hr><ul><li><a href="https://njump.me/nevent1qgswedmqdh5xep96ntzr8wr6plcmx2jl920v2mx3rmy6g5tz5mtxmwqpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqg0waehxw309ahx7um5wghx6mmdqyxhwumn8ghj7mn0wvhxcmmvqqs8skmkp0mqjhuvzs26hjkzsd8225st8zfth3rz8txhwjlpc5lf3gg62uvln" target="_blank" rel="noopener noreferrer">https://njump.me/nevent1qgswedmqdh5xep96ntzr8wr6plcmx2jl920v2mx3rmy6g5tz5mtxmwqpzemhxue69uhhyetvv9ujuurjd9kkzmpwdejhgqg0waehxw309ahx7um5wghx6mmdqyxhwumn8ghj7mn0wvhxcmmvqqs8skmkp0mqjhuvzs26hjkzsd8225st8zfth3rz8txhwjlpc5lf3gg62uvln</a></li><li><a href="https://local.google.com/place?id=1540968194272171033&amp;use=posts&amp;lpsid=CAIQACoeChxtc3BfaDpGZlVuUzAzLXRMNlZGNDBUMVJEZ0pn" target="_blank" rel="noopener noreferrer">https://local.google.com/place?id=1540968194272171033&amp;use=posts&amp;lpsid=CAIQACoeChxtc3BfaDpGZlVuUzAzLXRMNlZGNDBUMVJEZ0pn</a></li><li><a href="https://docs.google.com/document/d/1LJ8ldgPM8mu-Y7FMu8FOOrqKsCIr0qK5pgzbj1cgD7c/view" target="_blank" rel="noopener noreferrer">https://docs.google.com/document/d/1LJ8ldgPM8mu-Y7FMu8FOOrqKsCIr0qK5pgzbj1cgD7c/view</a></li><li><a href="https://docs.google.com/presentation/d/1juUBWCP3LtVPQW7hMbSbWy-ZzC0Ay2tEtHBsYVGAzLo/view" target="_blank" rel="noopener noreferrer">https://docs.google.com/presentation/d/1juUBWCP3LtVPQW7hMbSbWy-ZzC0Ay2tEtHBsYVGAzLo/view</a></li></ul>
+</article>
+</main>
+</body>
+</html>
